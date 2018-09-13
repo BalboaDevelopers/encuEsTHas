@@ -43,7 +43,7 @@ class App extends Component {
       };    
     });
     this.setState({candidates});
-    this.setCount();
+    this.setState({votersCount: this.state.votersCount + 1});
   }
 
   setCount = () => {
