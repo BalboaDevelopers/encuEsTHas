@@ -7,22 +7,39 @@ import CandidateCount from './components/CandidateCount';
 import CandidateVoteList from './components/CandidateVoteList';
 import CandidateChart from './components/CandidateChart';
 
+import  web3 from './web3';
+import Encuesthas from './Encuesthas';
+
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      candidates: [
-        {name: 'Juan Perez', voteCount: 100}
-      ],
+      candidates: [],
       votersCount: 0,
     }
   }
 
-  componentDidMount(){
-    // TODO: Get candidates from ETH
-    // this.setState(prevState => ({
-    //   candidates: [...prevState.candidates, {name: 'Juan Perez', voteCount: 100}]
-    // }));
+  componentDidMount = async () => {
+    const _candidates = await Encuesthas.methods.getCandidates().call();
+    let votersCount = 0;
+
+    _candidates[0] = _candidates[0].map(v => {
+      return web3.utils.hexToUtf8(v)
+    });
+    _candidates[1] = _candidates[1].map(v => {
+      votersCount += parseInt(v, 10);
+      return parseInt(v, 10)
+    });
+
+    for(let i = 0; i < _candidates[0].length; i++) {
+      if(!_candidates[0][i]){break;}
+      this.setState(prevState => ({
+        candidates: [...prevState.candidates, {name: _candidates[0][i], voteCount: _candidates[1][i]}]
+      }));
+    }
+
+    this.setState({votersCount});
     this.setCount();
   }
 
@@ -33,7 +50,7 @@ class App extends Component {
     }));
   }
 
-  handleAddVoteToCandidate = (idx, name) => {
+  handleAddVoteToCandidate = async (idx, name) => {
     // TODO: Add vote to candidate on ETH
     let candidates =  this.state.candidates.map( (_candidate, _idx) => {
       if(_idx !== idx) { return _candidate; }
@@ -42,6 +59,12 @@ class App extends Component {
         voteCount: _candidate.voteCount + 1,
       };    
     });
+
+    const accounts = await web3.eth.getAccounts();
+    await Encuesthas.methods.addVoteToCandidate(web3.utils.toHex(name)).send({
+        from: accounts[0],  // Default to the first one
+    });
+
     this.setState({candidates});
     this.setState({votersCount: this.state.votersCount + 1});
   }
@@ -102,7 +125,6 @@ class App extends Component {
             </div>
             </div> 
           </div>
-          
         </div>
       </div>
     );
