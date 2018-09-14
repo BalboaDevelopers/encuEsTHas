@@ -17,14 +17,13 @@ class App extends Component {
     this.state = {
       candidates: [],
       votersCount: 0,
+      loading: false,
     }
   }
 
   componentDidMount = async () => {
     const _candidates = await Encuesthas.methods.getCandidates().call();
     let votersCount = 0;
-
-    console.log(_candidates);
 
     _candidates[0] = _candidates[0].map(v => {
       return web3.utils.hexToUtf8(v)
@@ -53,13 +52,13 @@ class App extends Component {
   }
 
   handleAddVoteToCandidate = async (idx, name) => {
-    // TODO: Add vote to candidate on ETH
+    this.setState({loading: true});
     let candidates =  this.state.candidates.map( (_candidate, _idx) => {
       if(_idx !== idx) { return _candidate; }
       return {
         name: _candidate.name,
         voteCount: _candidate.voteCount + 1,
-      };    
+      };
     });
 
     const accounts = await web3.eth.getAccounts();
@@ -67,6 +66,7 @@ class App extends Component {
         from: accounts[0],  // Default to the first one
     });
 
+    this.setState({loading: false});    
     this.setState({candidates});
     this.setState({votersCount: this.state.votersCount + 1});
   }
@@ -79,9 +79,20 @@ class App extends Component {
     this.setState({votersCount})
   }
 
+  shouldRenderLoading = () => {
+    if(this.state.loading){
+      return(
+        <div className="col-sm-12">
+          <div>Cargando...</div>
+        </div>
+      )
+    }
+  }
+
   render() {
     return (
       <div className="row mx-5 my-5">
+        {this.shouldRenderLoading}
         <div className="col-6">
           <div className="row">
             <div className="col-12">
