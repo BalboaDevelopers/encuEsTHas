@@ -20,6 +20,7 @@ contract Encuesthas is Ownable {
     bytes32[10] candidatesNames;
     uint8[10] candidatesVoteCounts;
     mapping(bytes32 => bool) candidates;
+    mapping(bytes32 => uint8) candidatesIdx;
     mapping(address => bool) voters;
     mapping(bytes32 => uint8) candidatesCount;
 
@@ -37,6 +38,7 @@ contract Encuesthas is Ownable {
     function addCandidate(bytes32 _candidate) external onlyNewCandidate(_candidate)  {
         candidates[_candidate] = true;
         candidatesCount[_candidate] = 0;
+        candidatesIdx[_candidate] = counter;
 
         candidatesNames[counter] = _candidate;
         candidatesVoteCounts[counter] = 0;
@@ -48,7 +50,8 @@ contract Encuesthas is Ownable {
     function addVoteToCandidate(bytes32 _candidate) external {
         uint8 _candidateCount = candidatesCount[_candidate] + 1;
         candidatesCount[_candidate] = _candidateCount;
-        candidatesVoteCounts[counter] = _candidateCount;
+
+        candidatesVoteCounts[candidatesIdx[_candidate]] = _candidateCount;
         voters[msg.sender] = true;
         emit AddedVote(_candidate, _candidateCount);
     }

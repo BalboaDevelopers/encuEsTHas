@@ -24,6 +24,8 @@ class App extends Component {
     const _candidates = await Encuesthas.methods.getCandidates().call();
     let votersCount = 0;
 
+    console.log(_candidates);
+
     _candidates[0] = _candidates[0].map(v => {
       return web3.utils.hexToUtf8(v)
     });
