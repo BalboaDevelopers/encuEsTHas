@@ -66,6 +66,11 @@ class App extends Component {
         from: accounts[0],  // Default to the first one
     });
 
+    let a = {b: 'c'};
+    let _a = a;
+    _a.b = 'd';
+    console.log(a.b);
+
     this.setState({loading: false});    
     this.setState({candidates});
     this.setState({votersCount: this.state.votersCount + 1});
